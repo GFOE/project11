@@ -1,3 +1,9 @@
+/**
+
+Utilities used extensively in project11
+
+*/
+
 #ifndef P11_UTILS_H
 #define P11_UTILS_H
 
