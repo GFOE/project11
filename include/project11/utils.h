@@ -1,4 +1,5 @@
 /**
+@file utils.h
 
 Utilities used extensively in project11
 
@@ -23,8 +24,10 @@ namespace project11
     tf2::fromMsg(v, v3);
     return v3.length();
   }
-  
+
+  /** @brief Passthrough typdef to gz4d */
   typedef gz4d::GeoPointLatLongDegrees LatLongDegrees;
+  
   typedef gz4d::GeoPointECEF ECEF;
   typedef gz4d::Point<double> Point;
   typedef gz4d::LocalENU ENUFrame;

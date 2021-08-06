@@ -1419,6 +1419,8 @@ namespace gz4d
 
             typedef ReferenceFrame<ct::Geodetic<cf::LatLon, pu::Radian>, Ellipsoid> LatLonRadians;
             typedef ReferenceFrame<ct::Geodetic<cf::LonLat, pu::Radian>, Ellipsoid> LonLatRadians;
+
+	    
             typedef ReferenceFrame<ct::Geodetic<cf::LatLon, pu::Degree>, Ellipsoid> LatLonDegrees;
             typedef ReferenceFrame<ct::Geodetic<cf::LonLat, pu::Degree>, Ellipsoid> LonLatDegrees;
             typedef ReferenceFrame<ct::ECEF<>, Ellipsoid> ECEF;
@@ -1523,8 +1525,10 @@ namespace gz4d
         
 
     }
-    
+
+    //** \brief Defines a point of WGS lat/lon degrees **/
     typedef geo::Point<double,gz4d::geo::WGS84::LatLonDegrees> GeoPointLatLongDegrees;
+    
     typedef geo::Point<double,gz4d::geo::WGS84::LatLonRadians> GeoPointLatLongRadians;
     typedef geo::Point<double, gz4d::geo::WGS84::ECEF> GeoPointECEF;
     typedef geo::LocalENU<> LocalENU;
