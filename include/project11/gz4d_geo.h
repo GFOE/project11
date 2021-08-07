@@ -98,7 +98,6 @@ namespace gz4d
     * BSB is not sure why we this reinvents this wheel - why not use a standard library, e.g., boost, for this?
     * \ingroup base
     */
-    template <typename T, std::size_t N>
     template <typename T, std::size_t N> class Vector
     {
         public:
