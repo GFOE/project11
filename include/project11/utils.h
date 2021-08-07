@@ -13,6 +13,12 @@ Utilities used extensively in project11
 
 namespace project11
 {
+  /** @brief Uses the tf2::getYaw() utils function and converts to degrees, NED.  
+   * Does not appear that this is used anywhere in Project11.
+   * @param a An orientation messages, e.g., http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/Quaternion.html
+   * @see tf2:getYaw()
+   * @return Heading in degrees, NED.
+  */
   template <typename A> double quaternionToHeadingDegrees(const A& a)
   {
     return 90.0-180.0*tf2::getYaw(a)/M_PI;
@@ -25,10 +31,16 @@ namespace project11
     return v3.length();
   }
 
-  /** @brief Passthrough typdef to gz4d */
+  /** @brief Passthrough typdef to gz4d 
+  * @see gz4d_geo.h
+  */
   typedef gz4d::GeoPointLatLongDegrees LatLongDegrees;
   
   typedef gz4d::GeoPointECEF ECEF;
+
+  /** @brief Passthrough typeded to assign utils::Point as gz4d::Point with template datatype = double.
+  * Really makes it hard to follow the code
+  */
   typedef gz4d::Point<double> Point;
   typedef gz4d::LocalENU ENUFrame;
   
@@ -45,7 +57,11 @@ namespace project11
   typedef gz4d::Angle<double, gz4d::pu::Radian, gz4d::rt::PositivePeriod> AngleRadiansPositive;
   
   typedef gz4d::geo::WGS84::Ellipsoid WGS84;
-  
+
+  /** @brief Assigns LatLongDegrees object lat/lon/alt fields from NavSatFix ROS message 
+  * @param a The ROS message containing latitude, longitude and altitude attributes.
+  * @param b utils::LatLongDegrees object with data from the ROS message.
+  */
   template <typename A> void fromMsg(const A& a, LatLongDegrees &b)
   {
     b.latitude() = a.latitude;
@@ -60,11 +76,15 @@ namespace project11
     b.altitude = a.altitude();
   }
 
+  /** @brief Assigns utils::Point object x/y/z fields from ROS Point message.
+  * @param a The source ROS geometry_msgs::Point (or other message with .x, .y and .y attributes).
+  * @param b The destination utils::Point object containing the .x, .y and .z data as elements of the Point vector.
+  */
   template <typename A> void fromMsg(const A& a, Point &b)
   {
     b = Point(a.x, a.y, a.z);
   }
-
+  
   template <typename B> void toMsg(const Point& a, B &b)
   {
     b.x = a[0];

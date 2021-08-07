@@ -1,3 +1,10 @@
+/**
+@file gz4d_geo.h
+
+Geographic utilities condensed from Fledermaus libgz4d
+
+*/
+
 #ifndef GZ4D_GEO_H
 #define GZ4D_GEO_H
 
@@ -57,6 +64,7 @@ namespace gz4d
 //         return (l == "true" || l == "yes" || l == "on" || l == "1" || l == "t" || l == "y");
 //     }
     
+    //* @brief Why are we reininventing this wheel? */
     template<typename T> inline T Nan(){return std::numeric_limits<T>::quiet_NaN();}
     template<typename T> inline bool IsNan(T value){return (boost::math::isnan)(value);}
 
@@ -66,12 +74,15 @@ namespace gz4d
         void operator()(void const *) const {}
     };
 
+    /** @brief Convert from degrees to radians */
     template <typename T> inline T Radians(T degrees) {return degrees*0.01745329251994329577;}
+    /** @brief Convert from radians to degrees */
     template <typename T> inline T Degrees(T radians) {return radians*57.2957795130823208768;}
     
-    /// Use with lexical_cast to convert hex string to integer type.
-    /// From: http://stackoverflow.com/questions/1070497/c-convert-hex-string-to-signed-integer
-    /// Example: uint32_t value = boost::lexical_cast<HexTo<uint32_t> >("0x2a");
+    /** @brief Use with lexical_cast to convert hex string to integer type.
+    * From: http://stackoverflow.com/questions/1070497/c-convert-hex-string-to-signed-integer
+    * Example: uint32_t value = boost::lexical_cast<HexTo<uint32_t> >("0x2a");
+    */
     template <typename ElemT>
     struct HexTo {
         ElemT value;
@@ -83,10 +94,12 @@ namespace gz4d
     };
 
 
-    /// Base type for n-dimensional vectors.
-    /// \ingroup base
+    /** @brief Base type for n-dimensional vectors.
+    * BSB is not sure why we this reinvents this wheel - why not use a standard library, e.g., boost, for this?
+    * \ingroup base
+    */
     template <typename T, std::size_t N>
-    class Vector
+    template <typename T, std::size_t N> class Vector
     {
         public:
             static const std::size_t _size = N;
@@ -309,15 +322,27 @@ namespace gz4d
         return sum;
     }
 
-    
+    /** @brief Templated class for gz4d::Vector of length 3 or 4
+    * @see gzd::Vector
+    */
     template<typename T> class Point : public Vector<T,3>
     {
         public:
+            /** @brief Constuctor creates Point object with all values zero. **/
             Point():Vector<T,3>(0.0){}
+            /** @brief Constructor to create Point from pz4d::Vector of length 3. **/
             Point(Vector<T,3> const &v):Vector<T,3>(v){}
+            /** @brief Constructor to create normalized (?) Point from pz4d::Vector of length 4.
+            * BSB - very surprizing behavior that the 4th element is used to normalize the point - not clear why?
+            */ 
             Point(Vector<T,4> const &v):Vector<T,3>(v[0]/v[3],v[1]/v[3],v[2]/v[3]){}
+            /** @brief Construtor to create Point from three arguments */
             Point(T x, T y, T z):Vector<T,3>(x, y, z){}
+            /** @brief Assignes the equivelance operator to be the same as gzrd::Vector
+            * Element-wise comparison
+            */
             using Vector<T, 3>::operator=;
+            /** @brief Invalid stuffs vector with not-a-numbers. */
             static Point Invalid(){return Vector<T,3>(Nan<T>());}
             bool IsValid() const {return !(IsNan(Vector<T,3>::values[0])||IsNan(Vector<T,3>::values[1])||IsNan(Vector<T,3>::values[2]));}
             operator Vector<T, 4>() const {return Vector<T,4>(Vector<T,3>::values[0],Vector<T,3>::values[1],Vector<T,3>::values[2],1);}
@@ -1068,9 +1093,10 @@ namespace gz4d
         };
       }
 
-      // geographic point
-      // T is numeric type of components
-      // RF is the reference frame
+      /** @brief Geographic Point class based on gz4d::Point
+      * T is numeric type of components
+      * RF is the reference frame
+      */
       template<typename T, typename RF> class Point: public gz4d::Point<T>
       {
           public:
@@ -1086,6 +1112,9 @@ namespace gz4d
                   *this = typename RF::coordinate_type()(op);
               }
               
+              /** @brief Accesses element of underlying Point data type using index defined by coordinate type 
+              * Uses enumeration in geo::cf  (cf = coordinate format) to access the appropriate element.
+              */
               T latitude() const {return gz4d::Point<T>::operator[](RF::coordinate_type::coordinate_format::Latitude);}
               T longitude() const {return gz4d::Point<T>::operator[](RF::coordinate_type::coordinate_format::Longitude);};
               T altitude() const {return gz4d::Point<T>::operator[](RF::coordinate_type::coordinate_format::Height);};
@@ -1117,20 +1146,28 @@ namespace gz4d
           typedef ET ellipsoid_type;
       };
 
-      // coordinate types, such as cartesian, geodetic (lat/long), etc.
+      /** @brief Namespace for coordinate types: e.g., ECEF, cartesian, geodetic (lat/long), etc.
+      * 
+      */
       namespace ct
       {
+        /** @brief Earth-centered-Earth-fixed coordinated type */
         template <typename CF> struct ECEF;
 
-        // Geodetic coordinate type
-        // CF determines order of lat and long
-        // PU is period units for angles
+        /** @ breif Geodetic (lat/lon) coordinate type 
+        * CF determines order of lat and long
+        * PU is period units for angles
+        */
         template <typename CF=cf::LatLon, typename PU=pu::Degree> struct Geodetic
         {
             typedef CF coordinate_format;
             typedef PU period_units;
 
-            // convert from a different coordinate format
+            /** @brief Convert from a different coordinate format
+            *
+            * @see gz4d_geo::Point
+            * @returns Geographic point
+            */
             template <typename T, typename OCF, typename ET> Point<T, ReferenceFrame<Geodetic<CF,PU>,ET> > operator()(Point<T, ReferenceFrame<Geodetic<OCF,PU>,ET> > const &p)
             {
                 Point<T, ReferenceFrame<Geodetic<CF,PU>,ET> > ret;
@@ -1420,7 +1457,10 @@ namespace gz4d
             typedef ReferenceFrame<ct::Geodetic<cf::LatLon, pu::Radian>, Ellipsoid> LatLonRadians;
             typedef ReferenceFrame<ct::Geodetic<cf::LonLat, pu::Radian>, Ellipsoid> LonLatRadians;
 
-	    
+	        /** ReferenceFrame is a templated structure of ct=coordinate_type and 
+            * et=ellipsoid_type.
+            * 
+            */
             typedef ReferenceFrame<ct::Geodetic<cf::LatLon, pu::Degree>, Ellipsoid> LatLonDegrees;
             typedef ReferenceFrame<ct::Geodetic<cf::LonLat, pu::Degree>, Ellipsoid> LonLatDegrees;
             typedef ReferenceFrame<ct::ECEF<>, Ellipsoid> ECEF;
@@ -1526,7 +1566,10 @@ namespace gz4d
 
     }
 
-    //** \brief Defines a point of WGS lat/lon degrees **/
+    /** \brief Defines a point of WGS lat/lon degrees as a geo::Point
+    * @see geo::Point which is based on gz4d::Point 
+    * (Man, it is frustrating to have some many classes with the same name.)
+    */
     typedef geo::Point<double,gz4d::geo::WGS84::LatLonDegrees> GeoPointLatLongDegrees;
     
     typedef geo::Point<double,gz4d::geo::WGS84::LatLonRadians> GeoPointLatLongRadians;
